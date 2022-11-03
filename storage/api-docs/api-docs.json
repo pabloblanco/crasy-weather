@@ -1,0 +1,171 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Crazy Weather API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/getSuggestPlaylistByCity": {
+            "post": {
+                "tags": [
+                    "getSuggestPlaylistByCity"
+                ],
+                "summary": "Muestra una lista de reproduccion",
+                "description": "Devuelve una lista de reproduccion en funcion de la temperatura de la ciudad.",
+                "requestBody": {
+                    "description": "Input city name",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "city": {
+                                        "description": "The city name that you required the play list",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Response OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "description": "Status of the result of the request",
+                                            "type": "string"
+                                        },
+                                        "playlist": {
+                                            "description": "The city name that you required the play list",
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "description": "Message showing the result of the request",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer Token": [
+                            "Token:token"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/getSuggestPlaylistByLatitudeLongitude": {
+            "post": {
+                "tags": [
+                    "getSuggestPlaylistByLatitudeLongitude"
+                ],
+                "summary": "Muestra una lista de reproduccion",
+                "description": "Devuelve una lista de reproduccion en funcion de la temperatura de la latitud y longitud dada.",
+                "requestBody": {
+                    "description": "Input latitude longitude",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "latitude": {
+                                        "description": "The latitude that you required the play list",
+                                        "type": "string"
+                                    },
+                                    "longitude": {
+                                        "description": "The longitude that you required the play list",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Response OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "description": "Status of the result of the request",
+                                            "type": "string"
+                                        },
+                                        "playlist": {
+                                            "description": "The city name that you required the play list",
+                                            "type": "object"
+                                        },
+                                        "message": {
+                                            "description": "Message showing the result of the request",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer Token": [
+                            "Token:token"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "RequestsStats": {
+                "title": "RequestsStats model",
+                "description": "RequestsStats model",
+                "properties": {
+                    "fillable": {
+                        "title": "fillable",
+                        "description": "The attributes that are mass assignable.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "timestamps": {
+                        "title": "Request date",
+                        "description": "Request date",
+                        "type": "string",
+                        "format": "datetime",
+                        "default": "2017-02-02 18:31:45"
+                    },
+                    "hidden": {
+                        "title": "hidden",
+                        "description": "The attributes that should be hidden for serialization.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "casts": {
+                        "title": "casts",
+                        "description": "The attributes that should be cast",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}

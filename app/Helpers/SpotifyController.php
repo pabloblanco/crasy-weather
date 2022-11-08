@@ -3,14 +3,16 @@
 namespace App\Helpers;
 
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Spotify;
 use SpotifySeed;
 
 class SpotifyController extends BaseController
 {
-	public static function suggestedPlaylistByGenre($genre = null) {
+	public static function getSuggestedPlaylistByGenre($genre = null) {
 
-		if (!is_null($genre)) {
+		if (!empty($genre)) {
 
 			$trackList = [];
 			$count = 0;
@@ -22,9 +24,9 @@ class SpotifyController extends BaseController
 				$count = $count + 1;
 			}
 			
-			return $trackList[0];	
-
-		}else{
+			return $trackList[0];
+		   	
+		} else {
 
 			return null;
 

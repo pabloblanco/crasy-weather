@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Helpers\OpenWeatherMapController;
+use App\Helpers\SpotifyController;
 use App\Http\Controllers\CrazyWeatherController;
 
 /*
@@ -21,10 +22,6 @@ use App\Http\Controllers\CrazyWeatherController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 $router->group(['middleware' => ['AuthorizedIp', 'AuthorizedToken']], function ($app) {
-
-    $app->post('getTemperatureByCityName', [OpenWeatherMapController::class, "getTemperatureByCityName"]);
-
-    $app->post('getTemperatureByLatitudeLongitude', [OpenWeatherMapController::class, "getTemperatureByLatitudeLongitude"]);
 
     $app->post('getSuggestPlaylistByLatitudeLongitude', [CrazyWeatherController::class, "getSuggestPlaylistByLatitudeLongitude"]);
 

@@ -5,6 +5,8 @@ namespace App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
+use App\Exceptions\OpenWeatherMapApiException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Routing\Controller as BaseController;
 
 class OpenWeatherMapController extends BaseController
@@ -13,35 +15,89 @@ class OpenWeatherMapController extends BaseController
 
 		if (!is_null($request->city)){
 
-		   	$key = config('services.openweathermap.key');
-		   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?q=".$request->city."&lang=es"."&appid=".$key)->json();
+			try {
 
-		    if($response['cod'] == "200") {
+			   	$key = config('services.openweathermap.key');
+			   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?q=".$request->city."&lang=es"."&appid=".$key);
 
-			    $temperature = $response['main']['temp'] - 273;
-			    return $temperature;
-			    
-		    }
+			    if ($response->status() == 200) {
+
+			    	if  (isset($response['main']['temp'])) {
+
+					    $temperature = $response['main']['temp'] - 273;
+					    return $temperature;
+
+					} else {
+
+			    		return null;
+
+			    	}
+				    
+			    } else {
+
+			    	return null;
+
+			    }
+
+			} catch(RequestException $e) {
+
+		    	$errorResponse = $e;
+            	$status = $errorResponse->error->status;
+            	$message = $errorResponse->error->message;
+
+            	// Se puede incluir en OpenWeatherMapException que reporte el error al log o al Slack
+            	throw new OpenWeatherMapApiException($message, $status, $errorResponse);
+
+        	}
 
 		}
+
 		return null;
+		
 	}
 
 	public static function getTemperatureByLatitudeLongitude(Request $request) {
 
 		if (!is_null($request->latitude) && !is_null($request->longitude)){
 
-		   	$key = config('services.openweathermap.key');
-		   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?lat=".$request->latitude."&lon=".$request->longitude."&appid=".$key)->json();
+			try {
 
-		    if($response['cod'] == "200") {
+			   	$key = config('services.openweathermap.key');
+			   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?lat=".$request->latitude."&lon=".$request->longitude."&appid=".$key);
 
-			    $temperature = $response['main']['temp'] - 273;
-			    return $temperature;
+			    if ($response->status() == 200) {
 
-		    }
+			    	if  (isset($response['main']['temp'])) {
+
+					    $temperature = $response['main']['temp'] - 273;
+					    return $temperature;
+
+					} else {
+
+			    		return null;
+
+			    	}
+				    
+			    } else {
+
+			    	return null;
+
+			    }
+
+			} catch(RequestException $e) {
+
+		    	$errorResponse = json_decode($e->getResponse()->getBody()->getContents());
+            	$status = $errorResponse->error->status;
+            	$message = $errorResponse->error->message;
+
+            	// Se puede incluir en OpenWeatherMapException que reporte el error al log o al Slack
+            	throw new OpenWeatherMapApiException($message, $status, $errorResponse);
+
+        	}
 
 		}
+
 		return null;
+
 	}		
 }

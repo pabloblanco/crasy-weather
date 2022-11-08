@@ -145,64 +145,96 @@ class CrazyWeatherController extends Controller
         if (!empty($request->city)) {
 
             $temperature = OpenWeatherMapController::getTemperatureByCityName($request);
-            $response = self::getSuggestPlaylistByTemperature($temperature);
 
-            if (!is_null($response)) {
+            if (!is_null($temperature)) {
 
-                $log = RequestsStats::insert([
-                    'success'       => true,
-                    'city'       => $request->city,
-                    'response'      => json_encode($response),
-                    'ip'            => $request->ip(),
-                    'temperature'   => $temperature,
-                    'playlist'      => Arr::get($response, 'playlist'),
-                    'created_at'    => date('y-m-d h:m:s'),
-                ]); 
-                //dd($log);
-                return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');
+                $response = self::getSuggestPlaylistByTemperature($temperature);
+
+                if (!is_null($response)) {
+
+                    $statsRecord = RequestsStats::insert([
+                        'success'       => true,
+                        'city'          => $request->city,
+                        'response'      => json_encode($response),
+                        'ip'            => $request->ip(),
+                        'temperature'   => $temperature,
+                        'playlist'      => Arr::get($response, 'playlist'),
+                        'created_at'    => date('y-m-d h:m:s'),
+                    ]); 
+
+                    return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');
+
+                } else {
+
+                    $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getSuggestPlaylistByTemperature no devolvio informacion'];
+                    return response($response, 404)->header('Content-Type', 'application/json; charset=utf-8'); 
+
+                }
 
             } else {
 
-                $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getSuggestPlaylistByTemperature no devolvio informacion'];
-                return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8'); 
+                $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getTemperatureByCityName no devolvio informacion'];
+                return response($response, 404)->header('Content-Type', 'application/json; charset=utf-8'); 
 
             }
 
         } else {
 
             $response = ['success' => false, 'playlist' => null, 'message' => 'Se requiere del campo ciudad'];
-            return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');   
+            return response($response, 400)->header('Content-Type', 'application/json; charset=utf-8');   
 
         }
     }
 
     public function getSuggestPlaylistByLatitudeLongitude(Request $request){
 
-        if (isset($request->latitude) && isset($request->longitude)) {
+        if (!empty($request->latitude) && !empty($request->longitude)) {
 
             $temperature = OpenWeatherMapController::getTemperatureByLatitudeLongitude($request);
-            $response = self::getSuggestPlaylistByTemperature($temperature);
 
-            if (!is_null($response)) {
+            if (!is_null($temperature)) {
 
-                return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');
+                $response = self::getSuggestPlaylistByTemperature($temperature);
+
+                if (!is_null($response)) {
+
+                    $statsRecord = RequestsStats::insert([
+                        'success'       => true,
+                        'city'          => $request->latitude.', '.$request->longitude,
+                        'response'      => json_encode($response),
+                        'ip'            => $request->ip(),
+                        'temperature'   => $temperature,
+                        'playlist'      => Arr::get($response, 'playlist'),
+                        'created_at'    => date('y-m-d h:m:s'),
+                    ]); 
+
+                    return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');
+
+                } else {
+
+                    $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getSuggestPlaylistByTemperature no devolvio informacion'];
+                    return response($response, 404)->header('Content-Type', 'application/json; charset=utf-8'); 
+
+                }
 
             } else {
 
-                $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getSuggestPlaylistByTemperature no devolvio informacion'];
-                return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8'); 
+                $response = ['success' => false, 'playlist' => null, 'message' => 'El metodo getTemperatureByCityName no devolvio informacion'];
+                return response($response, 404)->header('Content-Type', 'application/json; charset=utf-8'); 
 
             }
 
         } else {
 
             $response = ['success' => false, 'playlist' => null, 'message' => 'Se requiere de los campos latitud y longitud'];
-            return response($response, 200)->header('Content-Type', 'application/json; charset=utf-8');   
+            return response($response, 400)->header('Content-Type', 'application/json; charset=utf-8');   
 
         }
     }   
 
     public function getSuggestPlaylistByTemperature($temperature = null){
+
+        $genre = '';
 
         if (!is_null($temperature)) {
 
@@ -214,29 +246,39 @@ class CrazyWeatherController extends Controller
                 $genre = 'pop';
             }
 
-            if ($temperature >= 10 && $temperature <= 14) {
+            if ($temperature >= 10 && $temperature < 15) {
                 $genre = 'rock';
             }
 
-            if ($temperature >= 10 && $temperature <= 14) {
+            if ($temperature < 10) {
                 $genre = 'classic';
             }
 
             $suggestedTrackNameList = Collect([]);
-            $trackListInfo = SpotifyController::suggestedPlaylistByGenre($genre);
-            $totalTracks = count($trackListInfo);
-            
-            for ($i = 0; $i < $totalTracks; $i++) {
-                $suggestedTrackNameList->put('Track '.$i+1, Arr::get($trackListInfo, $i.'.album.name'));
+            $trackListInfo = SpotifyController::getSuggestedPlaylistByGenre($genre);
+
+            if (!is_null($trackListInfo)) {
+
+                    $totalTracks = count($trackListInfo);
+                    
+                    for ($i = 0; $i < $totalTracks; $i++) {
+                        $suggestedTrackNameList->put('Track '.$i+1, Arr::get($trackListInfo, $i.'.album.name'));
+                    }
+
+                    $response = [
+                        'success' => true, 
+                        'playlist' => $suggestedTrackNameList, 
+                        'message' => 'Consulta exitosa'
+                    ];
+
+                    return $response;
+
+            } else {
+
+                return null;  
+
             }
 
-            $response = [
-                'success' => true, 
-                'playlist' => $suggestedTrackNameList, 
-                'message' => 'Consulta exitosa'
-            ];
-
-            return $response;
 
         }else{
 

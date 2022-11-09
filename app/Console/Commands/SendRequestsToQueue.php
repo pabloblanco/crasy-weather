@@ -7,6 +7,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use App\Jobs\SendRequest;
 use App\Models\QueueLogs;
+use Throwable;
 
 class SendRequestsToQueue extends Command
 {
@@ -41,18 +42,20 @@ class SendRequestsToQueue extends Command
      */
     public function handle()
     {
-        $quantityOfRequestsToSend = $this->argument('quantityOfRequestsToSend');
+
+        $quantityOfRequestsToSend = (int)$this->argument('quantityOfRequestsToSend');
         $this->info("Was created $quantityOfRequestsToSend requests, in batch process, these was sended to queue to be requested the server");
         $url = env('APP_URL').'/api/getSuggestPlaylistByCity';
         // Create the batch process with high priority for the failed jobs 
         $highPrioritybatch = Bus::batch([])->name('high')->onQueue('high')->dispatch();
-        $highPriorityBatchId = $highPrioritybatch->id;        
+        $highPriorityBatchId = $highPrioritybatch->id; 
+        $city = 'Guadalajara';       
         //Create an empty work
         $jobs = [];
 
         //Create the quantity jobs that belong to this batch process indicated in the Artisan Command in the quantityOfRequestsToSend variable
-        for ($count = 1; $count <= $quantityOfPostsToSend; $count++) {
-            array_Push($jobs, new SendRequest($url, $highPriorityBatchId));
+        for ($count = 1; $count <= $quantityOfRequestsToSend; $count++) {
+            array_Push($jobs, new SendRequest($url, $highPriorityBatchId, $city));
         }
 
         // Create the normal priority batch process with jobs   

@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
-
+use Throwable;
 use Http;
 
 class SendRequest implements ShouldQueue
@@ -28,7 +28,7 @@ class SendRequest implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($url, $highPriorityBatchId)
+    public function __construct($url, $highPriorityBatchId, $city)
     {
         $this->url = $url;
         $this->highPriorityBatchId = $highPriorityBatchId;
@@ -88,7 +88,7 @@ class SendRequest implements ShouldQueue
             // ----------------------------------------------------------------------------------------------------------------------
             if ($this->batch()->pendingJobs <= $maximumPendingJobsOnQueue){
                 $batch = Bus::findBatch($this->highPriorityBatchId);
-                $batch->add(new SendRequest($this->url,$this->highPriorityBatchId));
+                $batch->add(new SendRequest($this->url,$this->highPriorityBatchId, $this->city));
             }
             // Failing manually the process so that the job goes to the failed job queue             
             $this->fail();

@@ -91,6 +91,39 @@ El body de ejemplo viene con el campo City o Latitud y Longitud, dependiendo del
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Pruebas del desarrollo
 
+## Análisis estático del código
+
+Para realizar el análisis estático del código de la aplicación se configura la variable level, dentro del archivo phpstan.neon, en niveles de 1 a 9, siendo este último el de más alto nivel.
+
+        includes:
+            - ./vendor/nunomaduro/larastan/extension.neon
+
+        parameters:
+
+            paths:
+                - app/
+
+            # Level 9 is the highest level
+            level: 9
+
+        #    ignoreErrors:
+        #        - '#PHPDoc tag @var#'
+        #
+        #    excludePaths:
+        #        - ./*/*/FileToBeExcluded.php
+        #
+        #    checkMissingIterableValueType: false
+
+Luego desde la terminal, en el directorio o carpeta raiz del proyecto, se ejecuta el siguiente comando que muestra los errores a depurar, en caso de que haya.
+
+        Para Linux: ./vendor/bin/phpstan analyse
+
+        Para Windows: vendor\bin\phpstan analyse
+
+![ScreenHunter 2930](https://user-images.githubusercontent.com/11873645/200731060-9dd78139-9075-4550-8a85-a7f4a3bd90e6.png)
+
+## Pruebas unitarias y funcionales
+
 Para correr las pruebas, tanto funcionales como unitarias, ejecute el siguiente comando artisan desde la terminal:
 
     php artisan test 

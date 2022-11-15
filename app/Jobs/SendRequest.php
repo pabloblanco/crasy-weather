@@ -69,7 +69,7 @@ class SendRequest implements ShouldQueue
             // an automated infrastructure solution through APIs such as DigitalOcean, Amazon or Google Engine.
             // In this case, for simplicity, we compare pending jobs with the maximumPendingJobsOnQueue variable.
             // ---------------------------------------------------------------------------------------------------------------------- 
-            if ($this->batch()->pendingJobs() >= $maximumPendingJobsOnQueue){
+            if ($this->batch()->pendingJobs >= $maximumPendingJobsOnQueue){
                 // Implement something to increment the infrastructure here....
             }
         }

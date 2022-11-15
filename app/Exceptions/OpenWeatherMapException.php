@@ -8,9 +8,9 @@ class OpenWeatherMapException extends Exception
 {
     protected $apiResponse;
 
-    public function __construct($message = null, $code = 0, $apiResponse = null, Exception $previous = null)
+    public function __construct($message = null, $url = null, $apiResponse = null, Exception $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $url, $previous);
 
         $this->apiResponse = $apiResponse;
     }

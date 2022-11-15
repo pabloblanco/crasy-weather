@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 use App\Exceptions\OpenWeatherMapApiException;
-use Illuminate\Http\Client\RequestException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Routing\Controller as BaseController;
 
 class OpenWeatherMapController extends BaseController
@@ -41,12 +41,12 @@ class OpenWeatherMapController extends BaseController
 
 			} catch(RequestException $e) {
 
-		    	$errorResponse = $e;
-            	$status = $errorResponse->error->status;
-            	$message = $errorResponse->error->message;
+            	$url = $e->getRequest()->getUri();
+            	$apiResponse = $e->getRequest()->getRequestTarget();
+            	$message = $e->getMessage();
 
             	// Se puede incluir en OpenWeatherMapException que reporte el error al log o al Slack
-            	throw new OpenWeatherMapApiException($message, $status, $errorResponse);
+            	throw new OpenWeatherMapApiException($message, $url, $apiResponse, $e);
 
         	}
 

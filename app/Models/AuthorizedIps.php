@@ -23,8 +23,8 @@ class AuthorizedIps extends Model
 
   /**
    * [isIpValid Consulta si la IP de donde hace la peticion a la api esta registrada y activa]
-   * @param  [type]  $ipRequest [description]
-   * @return boolean            [description]
+   * @param  String  $ipRequested
+   * @return boolean
    */
   public static function isIpAuthorized($ipRequested)
   {

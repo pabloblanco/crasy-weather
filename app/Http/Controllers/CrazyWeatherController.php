@@ -262,7 +262,9 @@ class CrazyWeatherController extends Controller
                     $totalTracks = count($trackListInfo);
                     
                     for ($i = 0; $i < $totalTracks; $i++) {
-                        $suggestedTrackNameList->put('Track '.$i+1, Arr::get($trackListInfo, $i.'.album.name'));
+
+                        $track = 'Track '.(string) ($i + 1);
+                        $suggestedTrackNameList->put($track, Arr::get($trackListInfo, $i.'.album.name'));
                     }
 
                     $response = [

@@ -5,99 +5,82 @@ namespace App\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
-use App\Exceptions\OpenWeatherMapApiException;
-use GuzzleHttp\Exception\RequestException;
+use App\Exceptions\OpenWeatherMap\ApiException as OpenWeatherMapApiException;
+use App\Exceptions\Temperature\CannotGetException as TemperatureCannotGetException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Routing\Controller as BaseController;
 
 class OpenWeatherMapController extends BaseController
 {
 	public static function getTemperatureByCityName(Request $request) {
 
-		if (!is_null($request->city)){
+		try {
 
-			try {
+		   	$key = config('services.openweathermap.key');
+		   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?q=".$request->city."&lang=es"."&appid=".$key);
 
-			   	$key = config('services.openweathermap.key');
-			   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?q=".$request->city."&lang=es"."&appid=".$key);
+		    throw_if(($response->status() != 200), TemperatureCannotGetException::class, 'Fallo la consulta a la API de OpenWeathermap', $response->status());
 
-			    if ($response->status() == 200) {
+	    	if  (!empty($response['main']['temp'])) {
 
-			    	if  (isset($response['main']['temp'])) {
+			    $temperature = $response['main']['temp'] - 273;
 
-					    $temperature = $response['main']['temp'] - 273;
-					    return $temperature;
+			    return $temperature;
 
-					} else {
+			} else {
 
-			    		return null;
+	    		throw new TemperatureCannotGetException('Fallo la consulta a la API de OpenWeathermap, esta no devolvio la temperatura', 404);
 
-			    	}
-				    
-			    } else {
+	    	}
 
-			    	return null;
+		} catch(RequestException $e) {
 
-			    }
+    		$message = $e->getMessage();
+    		throw new OpenWeatherMapApiException($message, 400);
 
-			} catch(RequestException $e) {
+    	} catch(ConnectionException $e) {
 
-            	$url = $e->getRequest()->getUri();
-            	$apiResponse = $e->getRequest()->getRequestTarget();
-            	$message = $e->getMessage();
+    		$message = $e->getMessage();
+    		throw new OpenWeatherMapApiException($message, 400);
 
-            	// Se puede incluir en OpenWeatherMapException que reporte el error al log o al Slack
-            	throw new OpenWeatherMapApiException($message, $url, $apiResponse, $e);
-
-        	}
-
-		}
-
-		return null;
+    	}
 		
 	}
 
 	public static function getTemperatureByLatitudeLongitude(Request $request) {
 
-		if (!is_null($request->latitude) && !is_null($request->longitude)){
+		try {
 
-			try {
+		   	$key = config('services.openweathermap.key');
+		   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?lat=".$request->latitude."&lon=".$request->longitude."&appid=".$key);
 
-			   	$key = config('services.openweathermap.key');
-			   	$response = Http::get("https://api.openweathermap.org/data/2.5/weather?lat=".$request->latitude."&lon=".$request->longitude."&appid=".$key);
+		   	throw_if(($response->status() != 200), OpenWeatherMapApiException::class, 'Fallo la consulta a la API de OpenWeathermap', $response->status()); 
 
-			    if ($response->status() == 200) {
+	    	if  (isset($response['main']['temp'])) {
 
-			    	if  (isset($response['main']['temp'])) {
+			    $temperature = $response['main']['temp'] - 273;
+		    
+			    return $temperature;
 
-					    $temperature = $response['main']['temp'] - 273;
-					    return $temperature;
+			} else {
 
-					} else {
+				throw new TemperatureCannotGetException('Fallo la consulta a la API de OpenWeathermap, esta no devolvio la temperatura', 404);	
 
-			    		return null;
+		    }
+			    
+		} catch(RequestException $e) {
 
-			    	}
-				    
-			    } else {
+    		$message = $e->getMessage();
+    		throw new OpenWeatherMapApiException($message, 400);
 
-			    	return null;
+    	} catch(ConnectionException $e) {
 
-			    }
-
-			} catch(RequestException $e) {
-
-		    	$errorResponse = json_decode($e->getResponse()->getBody()->getContents());
-            	$status = $errorResponse->error->status;
-            	$message = $errorResponse->error->message;
-
-            	// Se puede incluir en OpenWeatherMapException que reporte el error al log o al Slack
-            	throw new OpenWeatherMapApiException($message, $status, $errorResponse);
-
-        	}
-
-		}
-
-		return null;
+    		$message = $e->getMessage();
+    		throw new OpenWeatherMapApiException($message, 400);
+    		
+    	}
 
 	}		
+
 }

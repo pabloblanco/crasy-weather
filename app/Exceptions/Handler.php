@@ -2,11 +2,21 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\MessageBag;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Arr;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -22,7 +32,12 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
-        //
+        AuthorizationException::class,
+        MethodNotAllowedHttpException::class,
+        HttpException::class,
+        ModelNotFoundException::class,
+        ValidationException::class,
+        //CannotGetException::class,
     ];
 
     /**
@@ -36,6 +51,11 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+    protected function context(): array
+    {
+        //
+    }
+
     /**
      * Register the exception handling callbacks for the application.
      *
@@ -47,4 +67,5 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
 }

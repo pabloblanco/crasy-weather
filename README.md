@@ -50,8 +50,13 @@ Los aspectos de seguridad se desarrollaron mediante la implementación de un sta
 3.- Abre la terminal desde la carpeta de tu proyecto y ejecuta los siguientes comandos artisan para instalar las dependencias y las tablas:
 
     composer install
+    artisan key:generate
 
-después
+en caso de usar Linux, ejecutar la siguiente linea para dar los permisos necesarios a la carpeta:
+
+    sudo chmod -R 777 storage bootstrap/cache
+    
+después de configurar la conexión a la base datos en el arvhivo .env, crear las tablas con el siguiente comando:
 
     php artisan migrate
  

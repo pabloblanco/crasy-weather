@@ -16,10 +16,8 @@ class OpenWeatherMapTest extends TestCase
     public function test_get_temperature_by_city_name()
     {
         $this->withoutMiddleware();
-        $response = $this->postJson('/getTemperatureByCityName', ['city' => 'guadalajara']);
- 
-        $response
-            ->assertStatus(200);
+        $temperature = $this->postJson('/getTemperatureByCityName', ['city' => 'guadalajara']);
+        $this->assertNotEmpty($temperature);
     }
 
     /**
@@ -30,10 +28,8 @@ class OpenWeatherMapTest extends TestCase
     public function test_get_temperature_by_latitude_longitude()
     {
         $this->withoutMiddleware();
-        $response = $this->postJson('/getTemperatureByCityName', ['latitude' => '20.66682', 'longitude' => '-103.39182']);
- 
-        $response
-            ->assertStatus(200);
+        $temperature = $this->postJson('/getTemperatureByCityName', ['latitude' => '20.66682', 'longitude' => '-103.39182']);
+        $this->assertNotEmpty($temperature);
     }
 
 }
